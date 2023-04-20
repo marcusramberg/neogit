@@ -137,8 +137,23 @@ function M.create()
         end
 
         cli.branch.move.args(branch, new_name).call():trim()
+    end)
         status.dispatch_refresh(true)
-      end)
+    )
+    :action(
+      "s",
+      "spin off branch",
+      operation("spinoff_branch", function()
+        local current_branch = branch.current()
+        local branches = branch.get_local_branches()
+        branch.create()
+        local new_branch = branch.current()
+        cli.checkout.branch(current_branch).call():trim()
+        upstream = branch.get_upstream(current_branch)
+        cli.reset.hard.upstream(upstream).call():trim()
+        cli.checkout.branch(new_branch).call():trim()
+        status.refresh(true, "create_branch")
+      end))
     )
     :build()
 
